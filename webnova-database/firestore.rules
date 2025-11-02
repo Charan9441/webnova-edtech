@@ -1,0 +1,43 @@
+rules_version = '2';
+service cloud.firestore {
+	match /databases/{database}/documents {
+		// Public profile readable for authenticated users if isPublicProfile == true
+		match /users/{userId} {
+			allow read: if request.auth != null && resource.data.isPublicProfile == true;
+			allow write: if request.auth != null && request.auth.uid == userId;
+		}
+
+		// Progress: only owner access
+		match /userProgress/{userId}/{progressId} {
+			allow read, write: if request.auth != null && request.auth.uid == userId;
+		}
+
+		// Leaderboards: read-only to authenticated
+		match /leaderboards/{period}/{uid} {
+			allow read: if request.auth != null;
+			allow write: if false;
+		}
+
+		// Badges: read-only
+		match /badges/{badgeId} {
+			allow read: if request.auth != null;
+			allow write: if false;
+		}
+
+		// Daily stats: only owner
+		match /dailyStats/{userId}/{date} {
+			allow read, write: if request.auth != null && request.auth.uid == userId;
+		}
+
+		// Streaks: only owner
+		match /streaks/{userId} {
+			allow read, write: if request.auth != null && request.auth.uid == userId;
+		}
+
+		// Sessions: only owner
+		match /userSessions/{userId}/{sessionId} {
+			allow read, write: if request.auth != null && request.auth.uid == userId;
+		}
+	}
+}
+
